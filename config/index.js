@@ -22,6 +22,11 @@ module.exports = (app) => {
   // In development environment the app logs
   app.use(logger("dev"));
 
+  // Express session, to send back a cookie to the Client with a session id
+  const session = require("express-session");
+  // Store the session in the database
+  const MongoStore = require("connect-mongo");
+
   // To have access to `body` property in the request
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
@@ -35,5 +40,18 @@ module.exports = (app) => {
   app.use(express.static(path.join(__dirname, "..", "public")));
 
   // Handles access to the favicon
-  app.use(favicon(path.join(__dirname, "..", "public", "images", "favicon.ico")));
+  app.use(
+    favicon(path.join(__dirname, "..", "public", "images", "favicon.ico"))
+  );
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "Please manage your secrets",
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 12,
+      },
+      store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+    })
+  );
 };

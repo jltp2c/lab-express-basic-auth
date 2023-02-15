@@ -1,0 +1,20 @@
+<h1>Sign Up session</h1>
+{{#if errorMessage}}
+<p class='error'>{{errorMessage}}</p>
+{{/if}}
+
+<form action='/auth/signup' method='post'>
+
+    <div>
+        <label for='username'>Username </label>
+        <input type='text' name='username' placeholder='Username:' />
+    </div>
+    <div>
+        <label for='password'>Password </label>
+        <input type='password' required name='password' placeholder='Password:'/>
+    </div>
+
+    <button type="submit">Sign up</button>
+
+    <p>Already have an account? <a href='/auth/login'>Login</a></p>
+</form>
