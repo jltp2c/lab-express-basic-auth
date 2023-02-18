@@ -2,11 +2,13 @@ const { Router } = require("express");
 const router = new Router();
 const User = require("../models/User.model");
 const bcrypt = require("bcrypt");
+const { isLoggedIn, isLoggedOut } = require("../middlewares/route-guard");
 
+////////////GET  SIGN UP ///////////
 router.get("/signup", async (req, res, next) => {
   res.render("auth/signup");
 });
-
+////////////POST  SIGN UP ///////////
 router.post("/signup", async (req, res, next) => {
   const { username, password } = req.body;
 
@@ -36,16 +38,22 @@ router.post("/signup", async (req, res, next) => {
     };
     const userFromDb = await User.create(userToCreate);
     console.log(userFromDb);
-    res.redirect("login");
+    res.redirect("/login");
   } catch (error) {
     next(error);
   }
 });
+//END SIGNUP\\
 
-router.get("/login", async (req, res, next) => {
+////////////GET  L O G I N ///////////
+
+router.get("/login", async (req, res) => {
   res.render("auth/login");
 });
-router.post("/login", async (req, res, next) => {
+
+////////////POST  L O G I N ///////////
+
+router.post("/login", isLoggedOut, async (req, res, next) => {
   const { username, password } = req.body;
   try {
     if (!username || !password) {
@@ -67,13 +75,38 @@ router.post("/login", async (req, res, next) => {
     const matchingPass = await bcrypt.compare(password, foundUser.password);
     if (!matchingPass) {
       return res.render("auth/login", {
-        errorMessage: "Invalid credentials!",
+        errorMessage: "Invalid passWord!",
       });
     }
     req.session.currentUser = foundUser;
-    res.redirect("profile");
+    //Je ne comprends pas pourquoi le prefixage de /user n'est pas utilisable ici j'ai du remettre /user alors que dans l'index.js du route jai defini le prefixage /user...
+    res.redirect("/user/profile");
   } catch (error) {
     next(error);
   }
 });
+
+//LOGOUT\\
+router.get("/logout", (req, res, next) => {
+  req.session.destroy((error) => {
+    if (error) {
+      return next(error);
+    }
+    res.redirect("/login");
+  });
+});
+
+//MAIN\\
+router.get("/main", isLoggedIn, (req, res) => {
+  let currentUser = req.session.user;
+  if (currentUser) res.render("main", currentUser);
+  else res.render("main");
+});
+
+router.get("/private", isLoggedIn, (req, res) => {
+  let currentUser = req.session.user;
+  if (currentUser) res.render("private", currentUser);
+  else res.render("private");
+});
+
 module.exports = router;
