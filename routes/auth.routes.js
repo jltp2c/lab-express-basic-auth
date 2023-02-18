@@ -86,7 +86,7 @@ router.post("/login", isLoggedOut, async (req, res, next) => {
   }
 });
 
-//LOGOUT\\
+//LOGOUT\\ // le button logout ne marche pas ....
 router.get("/logout", (req, res, next) => {
   req.session.destroy((error) => {
     if (error) {
