@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const { isLoggedIn, isLoggedOut } = require("../middlewares/route-guard");
 
 ////////////GET  SIGN UP ///////////
-router.get("/signup", async (req, res, next) => {
+router.get("/signup", isLoggedOut, async (req, res, next) => {
   res.render("auth/signup");
 });
 ////////////POST  SIGN UP ///////////
@@ -47,7 +47,7 @@ router.post("/signup", async (req, res, next) => {
 
 ////////////GET  L O G I N ///////////
 
-router.get("/login", async (req, res) => {
+router.get("/login", isLoggedOut, async (req, res) => {
   res.render("auth/login");
 });
 
@@ -87,12 +87,12 @@ router.post("/login", isLoggedOut, async (req, res, next) => {
 });
 
 //LOGOUT\\ // le button logout ne marche pas ....
-router.get("/logout", (req, res, next) => {
+router.post("/logout", (req, res, next) => {
   req.session.destroy((error) => {
     if (error) {
       return next(error);
     }
-    res.redirect("/login");
+    res.redirect("/auth/login");
   });
 });
 
